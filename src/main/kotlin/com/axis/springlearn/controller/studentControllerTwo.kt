@@ -3,18 +3,23 @@ package com.axis.springlearn.controller
 import com.axis.springlearn.model.Student
 import com.axis.springlearn.service.StudentServiceTwo
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.springframework.hateoas.EntityModel
+import org.springframework.hateoas.server.core.DummyInvocationUtils.methodOn
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder
 import org.springframework.web.bind.annotation.*
 import java.util.Optional
+import javax.validation.Valid
 
 @RestController
-class studentControllerTwo (@Autowired val studentService: StudentServiceTwo){
+class studentControllerTwo (
+    @Autowired val studentService: StudentServiceTwo
+    ){
     //Method    //Endpoint
-//    @GetMapping("/hello")
-//    fun display():String{
-//        return "Hello Empire"
-//    }
+
+    @GetMapping("/hellotwo")
+    fun display():String{
+        return "Hello Empire"
+    }
     @GetMapping("/studentstwo")
     fun getStudents(): List<Student> {
        return studentService.retriveAllStudent()
@@ -45,16 +50,18 @@ class studentControllerTwo (@Autowired val studentService: StudentServiceTwo){
 
     @GetMapping("/studenttwo/{id}")
     fun getStudent(@PathVariable id: Int): Optional<Student>{
-        println("Start")
         val student = studentService.retriveStudent(id)
-        println("End")
+        val model = EntityModel.of(student)  //simply wrap the student to add link
+//        val link= Link.of("http://localhost:8080/users")
+        val link= WebMvcLinkBuilder.linkTo(methodOn(this.javaClass).getStudents()).withRel("studenttable")
+        model.add(link)
         return student
     }
 
 //
 //
     @PostMapping("/studenttwo")
-    fun addStudent( @RequestBody student:Student): Student{
+    fun addStudent(@Valid @RequestBody student:Student): Student{
         return studentService.add(student)
     }
     @DeleteMapping("/studenttwo/{id}")
@@ -70,5 +77,8 @@ class studentControllerTwo (@Autowired val studentService: StudentServiceTwo){
 //    Delete Student
 //    Get Student
 //    Get All Student
+//HATEOAS =Hypermedia as the Engine of Application State
+    //   Data + Action Url
+
 
 }
